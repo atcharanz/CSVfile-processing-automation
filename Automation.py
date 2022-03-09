@@ -2,12 +2,12 @@ import mysql.connector
 import pandas as pd
 from functools import reduce
 
-#if rootserver is'nt  working create new SQLserver
+#if rootserver is'nt working create new SQLserver
 
 
 #connecting to SQLserver using mysql.connector
-mydb = mysql.connector.connect(host='localhost', user='charanc', passwd='Open@g50',
-                               database='mydata')
+mydb = mysql.connector.connect(host='localhost', user='root', passwd='password',
+                               database='mydatabase')
 mycursor = mydb.cursor()
 
 
@@ -15,7 +15,7 @@ mycursor = mydb.cursor()
 #EX:processed_df('2020VAERSData.csv','2020VAERSSYMPTOMS.csv','2020VAERSVAX.csv')
 
 #funtion to merge mutiple csv file into a single dataframe
-def processed_df(file1='', file2='', file3=''):
+def merged_csv(file1='', file2='', file3=''):
     # Reading csv file as data frames
     df1 = pd.read_csv(file1, encoding='ISO-8859-1', dtype=object, index_col=0)
     df2 = pd.read_csv(file2, encoding='ISO-8859-1', dtype=object, index_col=0)
@@ -25,7 +25,9 @@ def processed_df(file1='', file2='', file3=''):
     # Merging multiple dataframes into one
     df_merged = reduce(lambda left, right: pd.merge(left, right, on=['VAERS_ID'],
                                                     how='outer'), data_frames).fillna('None')
-    return df_merged
+   
+    #write merged dataframe into a new csv file 
+    processed_csv=df_merged.to_csv("Processed_csv")
 
 
 def create_db():
@@ -37,13 +39,14 @@ def create_db():
                             SYMPTOM1 VARCHAR(300),DIED VARCHAR(20))""")
 
 
-def dataupload_into_db(df_merged):
+def dataupload_into_db():
+
 
     req_fields=['VAERS_ID', 'AGE_YRS','SEX','VAX_NAME','VAX_DATE','VAX_ROUTE','SYMPTOM1','DIED']
 
    # Fetching required columns from merged dataframe  and convert into list
-    df = pd.read_csv("Processed.csv", encoding='ISO-8859-1', dtype=object)
-    req_val =  df[req_fields]
+    df = pd.read_csv("Processed_csv", encoding='ISO-8859-1', dtype=object)
+    req_val = df[req_fields]
     db_values = req_val.head(10).values.tolist()
 
     #SQL querry to insert fetched data to corresponding columns in database
@@ -58,10 +61,9 @@ def dataupload_into_db(df_merged):
 
 if __name__ == "__main__":
 
-    processed_df('2020VAERSData.csv','2020VAERSSYMPTOMS.csv','2020VAERSVAX.csv')
+    merged_csv('2020VAERSData.csv','2020VAERSSYMPTOMS.csv','2020VAERSVAX.csv')
     create_db()
-    dataupload_into_db(processed_df)
-
+    dataupload_into_db()
 
 
 
