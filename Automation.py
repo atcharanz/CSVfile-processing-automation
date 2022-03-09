@@ -2,7 +2,7 @@ import mysql.connector
 import pandas as pd
 from functools import reduce
 
-#if rootserver user not  working create new SQLserver
+#if rootserver is'nt  working create new SQLserver
 
 
 #connecting to SQLserver using mysql.connector
